@@ -120,12 +120,30 @@ const Index = () => {
           </Button>
           
           <Button
-            onClick={() => snoozeCurrentTab(45)}
+            onClick={() => snoozeCurrentTab(30)}
+            className="w-full mb-2"
+            variant="outline"
+          >
+            <Clock className="mr-2 h-4 w-4" />
+            Snooze for 30 minutes
+          </Button>
+
+          <Button
+            onClick={() => snoozeCurrentTab(60)}
+            className="w-full mb-2"
+            variant="outline"
+          >
+            <Clock className="mr-2 h-4 w-4" />
+            Snooze for 1 hour
+          </Button>
+
+          <Button
+            onClick={() => snoozeCurrentTab(120)}
             className="w-full"
             variant="outline"
           >
             <Clock className="mr-2 h-4 w-4" />
-            Snooze for 45 minutes
+            Snooze for 2 hours
           </Button>
         </TabsContent>
         
