@@ -1,3 +1,5 @@
+/// <reference types="chrome"/>
+
 let checkInterval: number | undefined;
 
 const checkSnoozedTabs = async () => {

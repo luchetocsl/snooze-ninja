@@ -12,21 +12,45 @@ interface SnoozedTab {
   wakeTime: number;
 }
 
+// Mock chrome.storage for development
+const mockChromeStorage = {
+  snoozedTabs: [] as SnoozedTab[],
+};
+
+const isExtension = typeof chrome !== 'undefined' && chrome.storage;
+
 const Index = () => {
   const [snoozedTabs, setSnoozedTabs] = useState<SnoozedTab[]>([]);
   const [date, setDate] = useState<Date>(new Date());
   const [customTime, setCustomTime] = useState<string>("12:00");
 
   useEffect(() => {
-    // Load snoozed tabs from storage
-    chrome.storage.local.get(["snoozedTabs"], (result) => {
-      setSnoozedTabs(result.snoozedTabs || []);
-    });
+    if (isExtension) {
+      // Real extension environment
+      chrome.storage.local.get(["snoozedTabs"], (result) => {
+        setSnoozedTabs(result.snoozedTabs || []);
+      });
+    } else {
+      // Development environment
+      setSnoozedTabs(mockChromeStorage.snoozedTabs);
+    }
   }, []);
 
   const snoozeCurrentTab = async (minutes?: number) => {
     try {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      let tab: chrome.tabs.Tab;
+      
+      if (isExtension) {
+        [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      } else {
+        // Mock tab for development
+        tab = {
+          url: "https://example.com",
+          title: "Example Tab",
+          id: 1,
+        } as chrome.tabs.Tab;
+      }
+
       if (!tab.url || !tab.title) return;
 
       let wakeTime: number;
@@ -46,10 +70,15 @@ const Index = () => {
       };
 
       const updatedTabs = [...snoozedTabs, newSnoozedTab];
-      await chrome.storage.local.set({ snoozedTabs: updatedTabs });
-      setSnoozedTabs(updatedTabs);
-      await chrome.tabs.remove(tab.id!);
       
+      if (isExtension) {
+        await chrome.storage.local.set({ snoozedTabs: updatedTabs });
+        await chrome.tabs.remove(tab.id!);
+      } else {
+        mockChromeStorage.snoozedTabs = updatedTabs;
+      }
+      
+      setSnoozedTabs(updatedTabs);
       toast.success("Tab snoozed successfully!");
     } catch (error) {
       toast.error("Failed to snooze tab");
@@ -59,7 +88,13 @@ const Index = () => {
 
   const cancelSnooze = async (url: string) => {
     const updatedTabs = snoozedTabs.filter((tab) => tab.url !== url);
-    await chrome.storage.local.set({ snoozedTabs: updatedTabs });
+    
+    if (isExtension) {
+      await chrome.storage.local.set({ snoozedTabs: updatedTabs });
+    } else {
+      mockChromeStorage.snoozedTabs = updatedTabs;
+    }
+    
     setSnoozedTabs(updatedTabs);
     toast.success("Snooze cancelled");
   };
