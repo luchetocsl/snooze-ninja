@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Tab Snoozer",
+  "version": "1.0",
+  "description": "Snooze tabs and have them reopen automatically at a specified time",
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+  "action": {
+    "default_popup": "index.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
